@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/mockitinerary.ts","./src/api/tripapi.ts","./src/components/daycard.tsx","./src/components/tripfilters.tsx","./src/constants/tripoptions.ts","./src/pages/homepage.tsx","./src/store/hooks.ts","./src/store/index.ts","./src/store/tripslice.ts","./src/types/trip.ts"],"version":"5.9.3"}
