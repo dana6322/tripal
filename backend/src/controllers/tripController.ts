@@ -5,7 +5,7 @@ import { generateItinerary } from "../services/geminiService";
 
 export const generateTrip = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const validatedTrip = req.body as GenerateTripSchemaOutput;
+    const validatedTrip = req.validatedBody as GenerateTripSchemaOutput;
     const prompt = buildTripPrompt(validatedTrip);
     const itinerary = await generateItinerary(prompt);
 

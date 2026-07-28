@@ -7,7 +7,8 @@ export interface GenerateTripRequest {
   destination: string;
   numberOfTravelers: number;
   travelerAges: number[];
-  numberOfDays: number;
+  startDate: string;
+  endDate: string;
   transportationPreferences: string[];
   activityPreferences: string[];
   stayPreference: StayPreference;

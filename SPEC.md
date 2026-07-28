@@ -15,7 +15,7 @@ The form must include:
 * Destination
 * Number of travelers
 * Age of each traveler
-* Number of days
+* Trip dates (start date and end date, chosen from a calendar, required)
 * Transportation preferences:
 
   * Car
@@ -60,7 +60,7 @@ GET /api/trips/generate
 Example:
 
 ```http
-/api/trips/generate?destination=Rome&numberOfTravelers=3&travelerAges=34,32,6&numberOfDays=4&transportationPreferences=walking,public_transport&activityPreferences=museums,food,history&stayPreference=include_day_trips&tripProfile=family&additionalDetails=One traveler is vegetarian
+/api/trips/generate?destination=Rome&numberOfTravelers=3&travelerAges=34,32,6&startDate=2026-08-10&endDate=2026-08-13&transportationPreferences=walking,public_transport&activityPreferences=museums,food,history&stayPreference=include_day_trips&tripProfile=family&additionalDetails=One traveler is vegetarian
 ```
 
 5. After receiving the itinerary, navigate to:
@@ -78,7 +78,8 @@ interface GenerateTripRequest {
   destination: string;
   numberOfTravelers: number;
   travelerAges: number[];
-  numberOfDays: number;
+  startDate: string;
+  endDate: string;
   transportationPreferences: string[];
   activityPreferences: string[];
   stayPreference:
@@ -117,7 +118,8 @@ GEMINI_MODEL=your_model_name
 * `destination: string, required`
 * `numberOfTravelers: number, integer, min 1`
 * `travelerAges: number[], each 0–120, length must equal numberOfTravelers`
-* `numberOfDays: number, integer, 1–14, required`
+* `startDate: date, required`
+* `endDate: date, required, must be on/after startDate, span at most 14 days`
 * `transportationPreferences: string[], min 1, required`
 * `activityPreferences: string[], min 1`
 * `stayPreference: "stay_in_city" | "include_day_trips" | "no_preference"`

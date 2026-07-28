@@ -106,8 +106,14 @@ const DAY_TEMPLATES: Omit<ItineraryDay, "dayNumber">[] = [
   },
 ];
 
+function countTripDays(startDate: string, endDate: string): number {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const diff = Math.round((new Date(endDate).getTime() - new Date(startDate).getTime()) / msPerDay) + 1;
+  return Number.isFinite(diff) ? diff : 1;
+}
+
 export function buildMockItinerary(request: GenerateTripRequest): Itinerary {
-  const numberOfDays = Math.max(1, request.numberOfDays);
+  const numberOfDays = Math.max(1, countTripDays(request.startDate, request.endDate));
   const days: ItineraryDay[] = Array.from({ length: numberOfDays }, (_, i) => {
     const template = DAY_TEMPLATES[i % DAY_TEMPLATES.length];
     return { dayNumber: i + 1, ...template };

@@ -1,5 +1,8 @@
 import * as yup from "yup";
 
+const MAX_TRIP_LENGTH_DAYS = 14;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 const splitCommaList = (value: unknown, originalValue: unknown): unknown =>
   typeof originalValue === "string"
     ? originalValue.split(",").map((item) => item.trim()).filter(Boolean)
@@ -33,12 +36,22 @@ export const generateTripSchema = yup.object({
         : schema
     ),
 
-  numberOfDays: yup
-    .number()
-    .integer()
-    .min(1, "Number of days must be at least 1.")
-    .max(14, "Number of days must be at most 14.")
-    .required("Number of days is required."),
+  startDate: yup.date().required("Start date is required."),
+
+  endDate: yup
+    .date()
+    .required("End date is required.")
+    .min(yup.ref("startDate"), "End date must be on or after the start date.")
+    .test(
+      "max-trip-length",
+      `Trip length must be at most ${MAX_TRIP_LENGTH_DAYS} days.`,
+      function (endDate) {
+        const { startDate } = this.parent as { startDate?: Date };
+        if (!startDate || !endDate) return true;
+        const numberOfDays = Math.round((endDate.getTime() - startDate.getTime()) / MS_PER_DAY) + 1;
+        return numberOfDays <= MAX_TRIP_LENGTH_DAYS;
+      }
+    ),
 
   transportationPreferences: yup
     .array()
