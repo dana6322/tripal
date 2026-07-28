@@ -1,12 +1,15 @@
-import type { GenerateTripRequest, Itinerary, ApiErrorResponse } from "../types/trip";
+import type {
+  GenerateTripRequest,
+  Itinerary,
+  ApiErrorResponse,
+} from "../types/trip";
 import { buildMockItinerary } from "./mockItinerary";
 
 // When true, always use mock data. Otherwise mock is only used as a
 // fallback if the backend server cannot be reached.
-const ALWAYS_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 const MOCK_DELAY_MS = 600;
 
-const ENDPOINT = "/api/trips/generate";
+const ENDPOINT = "/trips/generate";
 
 function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -21,15 +24,15 @@ function isErrorResponse(data: unknown): data is ApiErrorResponse {
   );
 }
 
-export async function generateTrip(request: GenerateTripRequest): Promise<Itinerary> {
+export async function generateTrip(
+  request: GenerateTripRequest,
+): Promise<Itinerary> {
   console.log("[generateTrip] QUERY", ENDPOINT);
   console.log("[generateTrip] request body:", request);
-  console.log("[generateTrip] request body (JSON):", JSON.stringify(request, null, 2));
-
-  if (ALWAYS_MOCK) {
-    await delay(MOCK_DELAY_MS);
-    return buildMockItinerary(request);
-  }
+  console.log(
+    "[generateTrip] request body (JSON):",
+    JSON.stringify(request, null, 2),
+  );
 
   let response: Response;
   try {

@@ -9,7 +9,7 @@ export const generateTrip = async (req: Request, res: Response, next: NextFuncti
     const prompt = buildTripPrompt(validatedTrip);
     const itinerary = await generateItinerary(prompt);
 
-    res.json({ success: true, data: itinerary });
+    res.json(itinerary);
   } catch (error) {
     next(error);
   }

@@ -11,7 +11,11 @@ const activitySchema = yup.object({
   estimatedDuration: yup.string().required(),
   transportation: yup.string().required(),
   category: yup.string().required(),
-  notes: yup.string().optional(),
+  notes: yup
+    .string()
+    .nullable()
+    .optional()
+    .transform((value) => (value === null ? undefined : value)),
 });
 
 const daySchema = yup.object({

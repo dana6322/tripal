@@ -85,14 +85,16 @@ export const generateItinerary = async (prompt: string): Promise<TripItinerary> 
   try {
     const result = await model.generateContent(prompt);
     rawText = result.response.text();
-  } catch {
+  } catch (error) {
+    console.error("[generateItinerary] Gemini request failed:", error);
     throw new AiGenerationError();
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(stripCodeFences(rawText));
-  } catch {
+  } catch (error) {
+    console.error("[generateItinerary] Failed to parse Gemini response as JSON:", error, "\nRaw text:", rawText);
     throw new AiGenerationError();
   }
 
@@ -101,7 +103,8 @@ export const generateItinerary = async (prompt: string): Promise<TripItinerary> 
       abortEarly: false,
       stripUnknown: true,
     });
-  } catch {
+  } catch (error) {
+    console.error("[generateItinerary] Gemini response failed schema validation:", error, "\nParsed:", parsed);
     throw new AiGenerationError();
   }
 };
