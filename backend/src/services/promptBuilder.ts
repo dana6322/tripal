@@ -6,6 +6,8 @@ const DEFAULT_TRANSPORTATION_PREFERENCES = ["walking", "public_transport"];
 const DEFAULT_ACTIVITY_PREFERENCES = ["sightseeing"];
 const DEFAULT_STAY_PREFERENCE = "no_preference";
 const DEFAULT_TRIP_PROFILE = "solo";
+const DEFAULT_TRIP_LENGTH_DAYS = 3;
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const stayPreferenceText: Record<string, string> = {
   stay_in_city: "Stay inside the city only.",
@@ -13,9 +15,28 @@ const stayPreferenceText: Record<string, string> = {
   no_preference: "No preference between staying in the city or taking day trips.",
 };
 
+const toISODate = (date: Date): string => date.toISOString().slice(0, 10);
+
+const getDefaultDateRange = (): { startDate: Date; endDate: Date } => {
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() + 1);
+  const endDate = new Date(startDate);
+  endDate.setDate(startDate.getDate() + DEFAULT_TRIP_LENGTH_DAYS - 1);
+  return { startDate, endDate };
+};
+
+const countTripDays = (startDate: Date, endDate: Date): number =>
+  Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / MS_PER_DAY) + 1);
+
 export const buildTripPrompt = (input: GenerateTripSchemaOutput): string => {
   const destination = input.destination;
-  const numberOfDays = input.numberOfDays;
+
+  const { startDate, endDate } =
+    input.startDate && input.endDate
+      ? { startDate: input.startDate, endDate: input.endDate }
+      : getDefaultDateRange();
+
+  const numberOfDays = countTripDays(startDate, endDate);
 
   const transportationPreferences =
     input.transportationPreferences && input.transportationPreferences.length > 0
@@ -49,6 +70,7 @@ Trip details:
 - Destination: ${destination}
 - Number of travelers: ${numberOfTravelers}
 - Traveler ages: ${travelerAges.join(", ")}
+- Travel dates: ${toISODate(startDate)} to ${toISODate(endDate)}
 - Number of days: ${numberOfDays}
 - Trip profile: ${tripProfile}
 - Transportation preferences: ${transportationPreferences.join(", ")}

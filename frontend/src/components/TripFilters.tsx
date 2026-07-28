@@ -12,6 +12,7 @@ import {
   Textarea,
   TextInput,
 } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
 import { IconAlertCircle, IconSparkles } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { generateTripThunk } from "../store/tripSlice";
@@ -34,6 +35,20 @@ interface TripFiltersProps {
   onSubmitted?: () => void;
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function toISODate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function countTripDays(startDate: Date | null, endDate: Date | null): number {
+  if (!startDate || !endDate) return 0;
+  return Math.round((endDate.getTime() - startDate.getTime()) / MS_PER_DAY) + 1;
+}
+
 export default function TripFilters({ onSubmitted }: TripFiltersProps) {
   const dispatch = useAppDispatch();
   const status = useAppSelector((s) => s.trip.status);
@@ -47,7 +62,10 @@ export default function TripFilters({ onSubmitted }: TripFiltersProps) {
   const [travelerAges, setTravelerAges] = useState<number[]>(
     savedRequest?.travelerAges ?? [30, 30]
   );
-  const [numberOfDays, setNumberOfDays] = useState<number>(savedRequest?.numberOfDays ?? 3);
+  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([
+    savedRequest?.startDate ? new Date(savedRequest.startDate) : null,
+    savedRequest?.endDate ? new Date(savedRequest.endDate) : null,
+  ]);
   const [transportationPreferences, setTransportationPreferences] = useState<string[]>(
     savedRequest?.transportationPreferences ?? []
   );
@@ -80,12 +98,16 @@ export default function TripFilters({ onSubmitted }: TripFiltersProps) {
     });
   }, [numberOfTravelers]);
 
+  const [rangeStart, rangeEnd] = dateRange;
+  const numberOfDays = countTripDays(rangeStart, rangeEnd);
+
   const request = useMemo<GenerateTripRequest>(
     () => ({
       destination: destination.trim(),
       numberOfTravelers,
       travelerAges,
-      numberOfDays,
+      startDate: rangeStart ? toISODate(rangeStart) : "",
+      endDate: rangeEnd ? toISODate(rangeEnd) : "",
       transportationPreferences,
       activityPreferences,
       stayPreference,
@@ -96,7 +118,8 @@ export default function TripFilters({ onSubmitted }: TripFiltersProps) {
       destination,
       numberOfTravelers,
       travelerAges,
-      numberOfDays,
+      rangeStart,
+      rangeEnd,
       transportationPreferences,
       activityPreferences,
       stayPreference,
@@ -111,8 +134,10 @@ export default function TripFilters({ onSubmitted }: TripFiltersProps) {
     if (numberOfTravelers < 1 || numberOfTravelers > MAX_TRAVELERS) {
       next.numberOfTravelers = `Travelers must be between 1 and ${MAX_TRAVELERS}.`;
     }
-    if (numberOfDays < 1 || numberOfDays > MAX_DAYS) {
-      next.numberOfDays = `Days must be between 1 and ${MAX_DAYS}.`;
+    if (!rangeStart || !rangeEnd) {
+      next.dateRange = "Select a trip start and end date.";
+    } else if (numberOfDays < 1 || numberOfDays > MAX_DAYS) {
+      next.dateRange = `Trip length must be between 1 and ${MAX_DAYS} days.`;
     }
     if (travelerAges.some((age) => age < 0 || age > MAX_AGE || Number.isNaN(age))) {
       next.travelerAges = `Each age must be between 0 and ${MAX_AGE}.`;
@@ -177,14 +202,15 @@ export default function TripFilters({ onSubmitted }: TripFiltersProps) {
             onChange={(v) => setNumberOfTravelers(Number(v) || 1)}
             error={errors.numberOfTravelers}
           />
-          <NumberInput
-            label="Number of days"
+          <DatePickerInput
+            type="range"
+            label="Trip dates"
+            placeholder="Select start and end date"
             withAsterisk
-            min={1}
-            max={MAX_DAYS}
-            value={numberOfDays}
-            onChange={(v) => setNumberOfDays(Number(v) || 1)}
-            error={errors.numberOfDays}
+            minDate={new Date()}
+            value={dateRange}
+            onChange={setDateRange}
+            error={errors.dateRange}
           />
         </SimpleGrid>
 
