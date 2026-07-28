@@ -112,16 +112,17 @@ GEMINI_MODEL=your_model_name
 
 ## Yup Validation
 
-Validate:
+`generateTripSchema` fields:
 
-* Destination is required.
-* Number of travelers is between 1 and 20.
-* Traveler ages match the number of travelers.
-* Ages are between 0 and 120.
-* Number of days is between 1 and 14.
-* At least one transportation preference is selected.
-* At least one activity preference is selected.
-* Additional details are limited to 1,000 characters.
+* `destination: string, required`
+* `numberOfTravelers: number, integer, min 1`
+* `travelerAges: number[], each 0–120, length must equal numberOfTravelers`
+* `numberOfDays: number, integer, 1–14, required`
+* `transportationPreferences: string[], min 1, required`
+* `activityPreferences: string[], min 1`
+* `stayPreference: "stay_in_city" | "include_day_trips" | "no_preference"`
+* `tripProfile: string`
+* `additionalDetails: string, max 1000 chars, optional`
 
 Use:
 
