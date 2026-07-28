@@ -99,10 +99,11 @@ export const generateItinerary = async (prompt: string): Promise<TripItinerary> 
   }
 
   try {
-    return await itinerarySchema.validate(parsed, {
+    const validated = await itinerarySchema.validate(parsed, {
       abortEarly: false,
       stripUnknown: true,
     });
+    return validated as TripItinerary;
   } catch (error) {
     console.error("[generateItinerary] Gemini response failed schema validation:", error, "\nParsed:", parsed);
     throw new AiGenerationError();
